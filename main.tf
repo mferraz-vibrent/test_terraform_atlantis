@@ -9,3 +9,8 @@ terraform {
 
 # Configure the GitHub Provider
 provider "github" {}
+
+variable "test" {
+  type    = string
+  default = "test"
+}
