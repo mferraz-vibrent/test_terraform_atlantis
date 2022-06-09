@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GH_USER_TOKEN }}
-    if: ${{ github.event.comment.body }} == "terraform apply"
+    if: ${{ github.event.comment.body == "terraform apply" }}
     steps:
     - name: Checkout
       uses: actions/checkout@v2
