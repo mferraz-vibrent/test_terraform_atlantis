@@ -5,11 +5,8 @@ on:
     types: [created]
 jobs:
   terraform-apply:
-    name: 'Terraform'
+    name: 'Terraform Apply'
     runs-on: ubuntu-latest
-    needs: terraform-plan
-    environment:
-      name: test_terraform_atlantis
     env:
       GITHUB_TOKEN: ${{ secrets.GH_USER_TOKEN }}
     steps:
