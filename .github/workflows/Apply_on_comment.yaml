@@ -19,7 +19,9 @@ jobs:
     
     - name: Terraform Apply
       id: apply
-      run: terraform apply -auto-approve -no-color
+      run: | 
+        terraform init
+        terraform apply -auto-approve -no-color
     
     # Post Terraform apply as a comment to PR
     - name: Post Terraform apply to PR
