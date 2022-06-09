@@ -1,0 +1,46 @@
+name: 'Terraform-apply'
+
+on:
+  pull_request_review_comment:
+    types: [created]
+jobs:
+  terraform-apply:
+    name: 'Terraform Apply'
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GH_USER_TOKEN }}
+    steps:
+      - name: echo
+        run: echo ${{ github.event.comment.body }}
+    # if: ${{ github.event.comment.body }} == "terraform apply"
+    # steps:
+    # - name: Checkout
+    #   uses: actions/checkout@v2
+      
+    # - name: Setup Terraform
+    #   uses: hashicorp/setup-terraform@v1
+    
+    # - name: Terraform Apply
+    #   id: apply
+    #   run: terraform apply -auto-approve -no-color
+    
+    # # Post Terraform apply as a comment to PR
+    # - name: Post Terraform apply to PR
+    #   uses: actions/github-script@v2
+    #   # if: github.event_name == 'pull_request'
+    #   env:
+    #     APPLY: "terraform\n${{ steps.apply.outputs.stdout }}"
+    #   with:
+    #     github-token: ${{ secrets.GITHUB_TOKEN }}
+    #     script: |
+    #       const output = `#### Terraform Apply 📖\`${{ steps.apply.outcome }}\`
+    #       <details><summary>Show Apply</summary>
+    #       \`\`\`${process.env.APPLY}\`\`\`
+    #       </details>
+    #       *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
+    #       github.issues.createComment({
+    #         issue_number: context.issue.number,
+    #         owner: context.repo.owner,
+    #         repo: context.repo.repo,
+    #         body: output
+    #       })  
