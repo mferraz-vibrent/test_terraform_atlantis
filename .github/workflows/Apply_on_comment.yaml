@@ -1,7 +1,7 @@
 name: 'Terraform-apply'
 
 on:
-  issue_comment:
+  pull_request_review_comment:
     types: [created, edited, deleted]
 jobs:
   terraform-apply:
@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GH_USER_TOKEN }}
-    if: github.event.comment.body == 'terraform apply'
+    if: (github.event.comment.body == 'terraform apply')
     steps:
     - name: Checkout
       uses: actions/checkout@v2
