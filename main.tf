@@ -12,5 +12,5 @@ provider "github" {}
 
 variable "test" {
   type    = string
-  default = "test4af"
+  default = "tesat4af"
 }
