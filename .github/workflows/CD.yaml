@@ -77,13 +77,13 @@ jobs:
             body: output
           })
           If its all fine, you can approve the next action to apply the changes.
-  # On push to master, build or change infrastructure according to Terraform configuration files
-  # Note: It is recommended to set up a required "strict" status check in your repository for "Terraform Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
+  # Build or change infrastructure according to Terraform configuration files
   terraform-apply:
     name: 'Terraform Apply'
     runs-on: ubuntu-latest
     needs: terraform-plan
     environment:
+      # Uses the environment with "required reviewers" configured
       name: test_terraform_atlantis
     steps:
     - name: Checkout
