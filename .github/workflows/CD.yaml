@@ -76,7 +76,7 @@ jobs:
             repo: context.repo.repo,
             body: output
           })
-          If its all fine, you can approve the next action to apply the changes.
+          `If its all fine, you can approve the next action to apply the changes.`
   # Build or change infrastructure according to Terraform configuration files
   terraform-apply:
     name: 'Terraform Apply'
