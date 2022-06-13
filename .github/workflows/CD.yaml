@@ -19,19 +19,8 @@ jobs:
         id: filter
         with:
           filters: |
-            cf_allofmarylandhealth_org: 'cf_allofmarylandhealth_org/**'
-            cf_allofusaz_org: 'cf_allofusaz_org/**'
-            cf_communitystudy_org: 'cf_communitystudy_org/**'
-            cf_covidcarestudy_org: 'cf_covidcarestudy_org/**'
-            cf_data4lifestudy_org: 'cf_data4lifestudy_org/**'
-            cf_echotrace_org: 'cf_echotrace_org/**'
-            cf_hlthrsrch_org: 'cf_hlthrsrch_org/**'
-            cf_joinallof_us: 'cf_joinallof_us/**'
-            cf_joinallofus_org: 'cf_joinallofus_org/**'
-            cf_lsregistry_org: 'cf_lsregistry_org/**'
-            cf_marylandprecisionhealth_org: 'cf_marylandprecisionhealth_org/**'
-            cf_vibrenthealth_com: 'cf_vibrenthealth_com/**'
-            cf_vibrentsre_com: 'cf_vibrentsre_com/**'
+            cf_1: 'cf_1/**'
+            cf_2: 'cf_2/**'
   terraform-fmt:
     name: Validate Terraform Modules
     needs: changes
