@@ -1,8 +1,8 @@
 name: Generate terraform docs
 on:
   pull_request:
-    branches:
-      - main
+    paths:
+      - */**
 
 jobs:
   docs:
@@ -15,7 +15,6 @@ jobs:
       - name: Render terraform docs and push changes back to PR
         uses: terraform-docs/gh-actions@main
         with:
-          find-dir: cf_*/**
           output-fmodulesile: README.md
           output-method: inject
           git-push: "true"
