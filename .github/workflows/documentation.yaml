@@ -1,8 +1,8 @@
 name: Generate terraform docs
 on:
   pull_request:
-    paths:
-      - cf_*
+    branches:
+      - main
 
 jobs:
   docs:

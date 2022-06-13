@@ -1,123 +1,86 @@
-name: 'Terraform'
+name: CI
 on:
   pull_request:
-    branches:
-    - main
-  workflow_dispatch:
-    branches:
-    - main
+    paths:
+      - cf_*/**
 jobs:
-  terraform-plan:
-    name: 'Terraform Lint and Plan'
+  changes:
     runs-on: ubuntu-latest
-
-    # Checkout the repository to the GitHub Actions runner
+    outputs:
+      # Output changed filters from filter step
+      modules: ${{ steps.filter.outputs.changes }}
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        # Determine changed filters based on file changes
+        # Reference: https://github.com/dorny/paths-filter
+      - name: Check for changes
+        uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            cf_allofmarylandhealth_org: 'cf_allofmarylandhealth_org/**'
+            cf_allofusaz_org: 'cf_allofusaz_org/**'
+            cf_communitystudy_org: 'cf_communitystudy_org/**'
+            cf_covidcarestudy_org: 'cf_covidcarestudy_org/**'
+            cf_data4lifestudy_org: 'cf_data4lifestudy_org/**'
+            cf_echotrace_org: 'cf_echotrace_org/**'
+            cf_hlthrsrch_org: 'cf_hlthrsrch_org/**'
+            cf_joinallof_us: 'cf_joinallof_us/**'
+            cf_joinallofus_org: 'cf_joinallofus_org/**'
+            cf_lsregistry_org: 'cf_lsregistry_org/**'
+            cf_marylandprecisionhealth_org: 'cf_marylandprecisionhealth_org/**'
+            cf_vibrenthealth_com: 'cf_vibrenthealth_com/**'
+            cf_vibrentsre_com: 'cf_vibrentsre_com/**'
+  terraform-fmt:
+    name: Validate Terraform Modules
+    needs: changes
+    runs-on: ubuntu-latest
+    # Step up a matrix with folder's names
+    # The job will be run separately for every changed module
+    strategy:
+      fail-fast: false
+      matrix:
+        dir: ${{ fromJSON(needs.changes.outputs.modules) }}
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v1
-    
-    # Prepares TFLint for use in subsequent steps
-    # Reference: https://github.com/terraform-linters/setup-tflint
-    - name: Setup TFLint
-      uses: terraform-linters/setup-tflint@v1
-      with:
-        tflint_version: v0.29.0
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-      # Executes TFLint
-    - name: Run TFLint
-      id: tflint
-      run: |
-        tflint --init
-        tflint -f json
-      continue-on-error: false
-
-    # Check that all Terraform configuration files adhere to a canonical format
-    - name: Terraform fmt
-      id: fmt
-      run: terraform fmt -check -diff
-      continue-on-error: false
-
-    # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
-    - name: Terraform Init
-      id: init
-      run: terraform init
-
-    - name: Terraform Validate
-      id: validate
-      run: terraform validate -no-color -json
-      continue-on-error: false
-
-    # Generate an execution plan for Terraform
-    - name: Terraform Plan
-      id: plan
-      run: terraform plan -no-color
-      continue-on-error: false
-
-    # Post Terraform plan as a comment to PR
-    - name: Post Terraform plan to PR
-      uses: actions/github-script@v2
-      env:
-        PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
-      with:
-        script: |
-          const output = `
-          #### TFLint ⚙️\`${{ steps.tflint.outcome }}\`
-          #### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
-          #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
-          #### Terraform Validation 🤖${{ steps.validate.outputs.stdout }}
-          #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
-          <details><summary>Show Plan</summary>
-          \`\`\`${process.env.PLAN}\`\`\`
-          </details>
-          *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
-          github.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: output
-          })
-  # # Build or change infrastructure according to Terraform configuration files
-  # terraform-apply:
-  #   name: 'Terraform Apply'
-  #   runs-on: ubuntu-latest
-  #   needs: terraform-plan
-  #   environment:
-  #     # Uses the environment with "required reviewers" configured
-  #     name: test_terraform_atlantis
-  #   steps:
-  #   - name: Checkout
-  #     uses: actions/checkout@v2
-
-  #   - name: Setup Terraform
-  #     uses: hashicorp/setup-terraform@v1
-
-  #   # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
-  #   - name: Terraform Init
-  #     id: init
-  #     run: terraform init
-
-  #   - name: Terraform Apply
-  #     id: apply
-  #     run: terraform apply -auto-approve -no-color
-    
-  #   # Post Terraform apply as a comment to PR
-  #   - name: Post Terraform apply to PR
-  #     uses: actions/github-script@v2
-  #     env:
-  #       APPLY: "terraform\n${{ steps.apply.outputs.stdout }}"
-  #     with:
-  #       script: |
-  #         const output = `#### Terraform Apply 📖\`${{ steps.apply.outcome }}\`
-  #         <details><summary>Show Apply</summary>
-  #         \`\`\`${process.env.APPLY}\`\`\`
-  #         </details>
-  #         *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
-  #         github.issues.createComment({
-  #           issue_number: context.issue.number,
-  #           owner: context.repo.owner,
-  #           repo: context.repo.repo,
-  #           body: output
-  #         })
+      - uses: actions/cache@v2
+        name: Cache plugin dir
+        with:
+          path: ~/.tflint.d/plugins
+          key: tflint-${{ hashFiles('.tflint.hcl') }}
+        # Prepares Terraform for use in subsequent steps
+        # Reference: https://github.com/hashicorp/setup-terraform
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.1.4
+        # Prepares TFLint for use in subsequent steps
+        # Reference: https://github.com/terraform-linters/setup-tflint
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v1
+        with:
+          tflint_version: v0.29.0
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+        # Executes TFLint
+      - name: Run TFLint
+        run: |
+          tflint --init
+          tflint -f json
+        working-directory: ${{ matrix.dir }}
+        # Executes terraform fmt. Fail if there are differences.
+        # Reference: https://www.terraform.io/cli/commands/fmt
+      - name: Terraform fmt
+        id: fmt
+        run: terraform fmt -check -diff
+        working-directory: ${{ matrix.dir }}
+        # Executes terraform validate
+        # Reference: https://www.terraform.io/cli/commands/validate
+      - name: Terraform Validate
+        id: init
+        run: |
+          terraform init -backend=false
+          terraform validate -json
+        working-directory: ${{ matrix.dir }}
