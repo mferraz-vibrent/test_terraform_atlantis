@@ -2,7 +2,7 @@ name: Generate terraform docs
 on:
   pull_request:
     paths:
-      - */**
+      - cf_*/**
 
 jobs:
   docs:
